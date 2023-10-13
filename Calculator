@@ -1,1 +1,78 @@
+import tkinter as tk
+from tkinter import messagebox
 
+def button_click(number):
+    current_expression = display_entry.get()
+    cursor_position = display_entry.index(tk.INSERT)
+    if cursor_position > 0 and current_expression[cursor_position-1].isdigit() and str(number) == "(":
+        # Add a multiplication symbol before the (
+        new_expression = current_expression[:cursor_position] + "*" + str(number) + current_expression[cursor_position:]
+    else:
+        new_expression = current_expression[:cursor_position] + str(number) + current_expression[cursor_position:]
+    display_entry.delete(0, tk.END)
+    display_entry.insert(0, new_expression)
+
+def operator_click(operator):
+    current_expression = display_entry.get()
+    cursor_position = display_entry.index(tk.INSERT)
+    if operator == "(" and cursor_position > 0 and current_expression[cursor_position-1].isdigit():
+        operator = "*("
+    elif operator == ")" and cursor_position < len(current_expression) and current_expression[cursor_position].isdigit():
+        operator = ")*"
+    new_expression = current_expression[:cursor_position] + operator + current_expression[cursor_position:]
+    display_entry.delete(0, tk.END)
+    display_entry.insert(0, new_expression)
+
+def evaluate():
+    current_expression = display_entry.get()
+    try:
+        result = eval(current_expression)
+        display_entry.delete(0, tk.END)
+        display_entry.insert(0, str(result))
+    except ZeroDivisionError:
+        messagebox.showerror("Error", "Cannot divide by zero!")
+    except Exception as e:
+        messagebox.showerror("Error", "Invalid expression!")
+
+def clear():
+    display_entry.delete(0, tk.END)
+
+def delete():
+    current_expression = display_entry.get()
+    cursor_index = display_entry.index(tk.INSERT)
+    if cursor_index > 0:
+        new_expression = current_expression[:cursor_index-1] + current_expression[cursor_index:]
+        display_entry.delete(0, tk.END)
+        display_entry.insert(0, new_expression)
+
+
+root = tk.Tk()
+root.title("Simple Calculator")
+
+display_entry = tk.Entry(root, font=("Helvetica", 24), justify="right")
+display_entry.grid(row=0, column=0, columnspan=4)
+
+for i in range(1, 10):
+    button = tk.Button(root, text=str(i), font=("Helvetica", 18), command=lambda i=i: button_click(i))
+    button.grid(row=(i-1)//3 + 1, column=(i-1)%3)
+button_0 = tk.Button(root, text="0", font=("Helvetica", 18), command=lambda: button_click(0))
+button_0.grid(row=4, column=0)
+
+operators = ["+", "-", "*", "/"]
+for i, operator in enumerate(operators):
+    button = tk.Button(root, text=operator, font=("Helvetica", 18), command=lambda operator=operator: operator_click(operator))
+    button.grid(row=i+1, column=4)
+
+button_clear = tk.Button(root, text="C", font=("Helvetica", 18), command=clear)
+button_clear.grid(row=5, column=0)
+button_delete = tk.Button(root, text="DEL", font=("Helvetica", 18), command=delete)
+button_delete.grid(row=5, column=1)
+button_equals = tk.Button(root, text="=", font=("Helvetica", 18), command=evaluate)
+button_equals.grid(row=5, column=2)
+button_left_parenthesis = tk.Button(root, text="(", font=("Helvetica", 18), command=lambda: button_click("("))
+button_left_parenthesis.grid(row=4, column=1)
+button_right_parenthesis = tk.Button(root, text=")", font=("Helvetica", 18), command=lambda: button_click(")"))
+button_right_parenthesis.grid(row=4, column=2)
+
+
+root.mainloop()
